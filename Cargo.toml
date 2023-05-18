@@ -2,6 +2,10 @@
 name = "astroport-math"
 version = "0.1.0"
 edition = "2021"
+description = "A collection of math functions extractde from Astroport smart contracts to be used with WASM in TypeScript/NodeJS."
+keywords = ["astroport", "blockchain", "dex", "swap", "math", "wasm", "typescript", "nodejs"]
+license = "GPL-3.0"
+authors = ["astroport", "Delphi Labs (delphi-labs)"]
 
 [lib]
 crate-type = ["cdylib"]

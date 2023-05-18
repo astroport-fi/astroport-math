@@ -23,11 +23,10 @@ jobs:
           node-version: 16.x
           registry-url: https://registry.npmjs.org/
 
-      - name: Switch to test directory
-        run: cd test
-
       - name: Install dependencies
+        working-directory: ./test
         run: npm ci
 
       - name: Run tests
+        working-directory: ./test
         run: npm run test
