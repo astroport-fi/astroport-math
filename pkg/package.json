@@ -1,0 +1,21 @@
+{
+  "name": "@delphi-labs/astroport-math",
+  "version": "0.1.0",
+  "description": "A collection of math functions extracted from Astroport smart contracts to be used with WASM in TypeScript/NodeJS.",
+  "keywords": ["astroport", "blockchain", "dex", "swap", "math", "wasm", "typescript", "nodejs"],
+  "author": "Delphi Labs (delphi-labs)",
+  "license": "GPL-3",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/astroport-fi/astroport-math.git"
+  },
+  "files": [
+    "astroport_math_bg.wasm",
+    "astroport_math.js",
+    "astroport_math.d.ts",
+    "../LICENSE",
+    "../README.md"
+  ],
+  "main": "astroport_math.js",
+  "types": "astroport_math.d.ts"
+}
