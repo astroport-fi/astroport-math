@@ -26,7 +26,7 @@ import { xyk_swap } from '@astroport/math';
 
 const swap = JSON.parse(xyk_swap(
   "1000000",
-  String("0"),
+  "0",
   JSON.stringify(["1000000000", "1000000000000"]),
   "0.003"
 ));
