@@ -26,9 +26,9 @@ import { calculateFee } from '@delphi-labs/astroport-math';
 
 ```
 
-[npm-url]: https://www.npmjs.com/package/@delphi-labs/astroport-math
-[npm-image]: https://img.shields.io/npm/v/@delphi-labs/astroport-math
-[npm-typescript]: https://img.shields.io/npm/types/@delphi-labs/astroport-math
+[npm-url]: https://www.npmjs.com/package/@astroport/math
+[npm-image]: https://img.shields.io/npm/v/@astroport/math
+[npm-typescript]: https://img.shields.io/npm/types/@astroport/math
 [github-license]: https://img.shields.io/github/license/astroport-fi/astroport-math
 [github-license-url]: https://github.com/astroport-fi/astroport-math/blob/main/LICENSE
 [github-build]: https://github.com/astroport-fi/astroport-math/actions/workflows/publish.yml/badge.svg

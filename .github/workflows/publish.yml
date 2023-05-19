@@ -11,6 +11,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Setup rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Setup wasm-pack
+        uses: jetli/wasm-pack-action@v0.4.0
+        with:
+          version: 'latest'
+
+      - name: Build package
+        run: make build
+
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
