@@ -1,5 +1,5 @@
 {
-  "name": "test",
+  "name": "@astroport/math-test",
   "version": "1.0.0",
   "description": "",
   "main": "index.ts",
@@ -15,8 +15,9 @@
     "typescript": "^4.1.3"
   },
   "dependencies": {
-    "astroport-math": "file:../pkg",
     "@cosmjs/cosmwasm-stargate": "^0.30.1",
-    "bignumber.js": "^9.1.1"
+    "@astroport/math": "file:../pkg",
+    "bignumber.js": "^9.1.1",
+    "chalk": "^4.1.2"
   }
 }

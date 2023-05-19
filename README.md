@@ -10,15 +10,13 @@ A collection of math functions extractde from Astroport smart contracts to be us
 ## Generate WASM
 
 ```bash
-wasm-pack build --target nodejs
+make build
 ```
 
 ## Run tests
 
 ```bash
-cd test/
-npm install
-npm run test
+make run-tests
 ```
 
 ## Usage

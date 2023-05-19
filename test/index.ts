@@ -1,6 +1,13 @@
+import chalk from "chalk";
 import { CosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import BigNumber from "bignumber.js";
-import { xyk_swap, stable_swap, concentrated_swap } from "astroport-math";
+import { xyk_swap, stable_swap, concentrated_swap } from "@astroport/math";
+
+function assert(condition: boolean, message?: string) {
+  if (!condition) {
+    throw message || "Test failed";
+  }
+}
 
 type AssetInfo = CW20AssetInfo | NativeAssetInfo;
 type CW20AssetInfo = { token: { contract_addr: string } };
@@ -91,20 +98,22 @@ async function xyk_swap_test(client: CosmWasmClient) {
             XYK_FEE
           )
         );
-        console.assert(
+        assert(
           xyk_result.return_amount === simulation.return_amount &&
             xyk_result.spread_amount === simulation.spread_amount &&
-            xyk_result.commission_amount === simulation.commission_amount,
-          `\nxyk_result: ${JSON.stringify(
-            xyk_result
-          )}\nsimulation: ${JSON.stringify(simulation)}`
+            xyk_result.commission_amount === simulation.commission_amount
         );
       }
     }
 
-    console.log("xyk assertions: done");
+    console.info(chalk.green("xyk assertions: pass"));
+    return true;
   } catch (e) {
     console.error(e);
+    console.error(chalk.yellow("expected: ", JSON.stringify(simulation)));
+    console.error(chalk.yellow("actual: ", JSON.stringify(xyk_result)));
+    console.error(chalk.red("xyk assertions: fail"));
+    return false;
   }
 }
 
@@ -167,20 +176,21 @@ async function stable_swap_test(client: CosmWasmClient) {
             next_amp
           )
         );
-        console.assert(
+        assert(
           stable_result.return_amount === simulation.return_amount &&
             stable_result.spread_amount === simulation.spread_amount &&
-            stable_result.commission_amount === simulation.commission_amount,
-          `\nstable_result: ${JSON.stringify(
-            stable_result
-          )}\nsimulation: ${JSON.stringify(simulation)}`
+            stable_result.commission_amount === simulation.commission_amount
         );
       }
     }
 
-    console.log("stable assertions: done");
+    console.info(chalk.green("stable assertions: pass"));
+    return true;
   } catch (e) {
-    console.error(e);
+    console.error(chalk.yellow("expected: ", JSON.stringify(simulation)));
+    console.error(chalk.yellow("actual: ", JSON.stringify(stable_result)));
+    console.error(chalk.red("stable assertions: fail"));
+    return false;
   }
 }
 
@@ -255,29 +265,33 @@ async function concentrated_swap_test(client: CosmWasmClient) {
             future_gamma
           )
         );
-        console.assert(
+        assert(
           pcl_result.return_amount === simulation.return_amount &&
             pcl_result.spread_amount === simulation.spread_amount &&
-            pcl_result.commission_amount === simulation.commission_amount,
-          `\npcl_result: ${JSON.stringify(
-            pcl_result
-          )}\nsimulation: ${JSON.stringify(simulation)}`
+            pcl_result.commission_amount === simulation.commission_amount
         );
       }
     }
 
-    console.log("pcl assertions: done");
+    console.info(chalk.green("pcl assertions: pass"));
+    return true;
   } catch (e) {
     console.error(e);
+    console.error(chalk.yellow("expected: ", JSON.stringify(simulation)));
+    console.error(chalk.yellow("actual: ", JSON.stringify(pcl_result)));
+    console.error(chalk.red("pcl assertions: fail"));
+    return false;
   }
 }
 
 (async function () {
-  const client = await CosmWasmClient.connect(
-    "https://multichain-nodes.astroport.fi/pisco-1/rpc/"
-  );
+  const client = await CosmWasmClient.connect("https://pisco-rpc.terra.dev/");
 
-  await xyk_swap_test(client);
-  await stable_swap_test(client);
-  await concentrated_swap_test(client);
+  const xyk_test = await xyk_swap_test(client);
+  const stable_test = await stable_swap_test(client);
+  const concentrated_test = await concentrated_swap_test(client);
+
+  if (!xyk_test || !stable_test || !concentrated_test) {
+    throw new Error("Tests failed!");
+  }
 })();
