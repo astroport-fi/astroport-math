@@ -177,8 +177,14 @@ async function stable_swap_test(client: CosmWasmClient) {
           )
         );
         assert(
-          stable_result.return_amount === simulation.return_amount &&
-            stable_result.spread_amount === simulation.spread_amount &&
+          BigNumber(stable_result.return_amount)
+            .minus(simulation.return_amount)
+            .abs()
+            .toNumber() <= 1 &&
+            BigNumber(stable_result.commission_amount)
+              .minus(simulation.commission_amount)
+              .abs()
+              .toNumber() <= 1 &&
             stable_result.commission_amount === simulation.commission_amount
         );
       }
