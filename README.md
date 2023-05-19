@@ -5,7 +5,7 @@
 ![npm-typescript]
 [![License][github-license]][github-license-url]
 
-A collection of math functions extractde from Astroport smart contracts to be used with WASM in TypeScript/NodeJS.
+A collection of math functions extracted from Astroport smart contracts to be used with WASM in TypeScript/NodeJS.
 
 ## Generate WASM
 
