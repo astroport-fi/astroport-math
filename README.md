@@ -22,8 +22,19 @@ make run-tests
 ## Usage
 
 ```typescript
-import { calculateFee } from '@delphi-labs/astroport-math';
+import { xyk_swap } from '@astroport/math';
 
+const swap = JSON.parse(xyk_swap(
+  "1000000",
+  String("0"),
+  JSON.stringify(["1000000000", "1000000000000"]),
+  "0.003"
+));
+// {
+//   "return_amount": "999999",
+//   "spread_amount": "1",
+//   "commission_amount": "32"
+// }
 ```
 
 [npm-url]: https://www.npmjs.com/package/@astroport/math
