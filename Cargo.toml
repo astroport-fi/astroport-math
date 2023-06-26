@@ -1,6 +1,6 @@
 [package]
 name = "math"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 description = "A collection of math functions extractde from Astroport smart contracts to be used with WASM in TypeScript/NodeJS."
 keywords = ["astroport", "blockchain", "dex", "swap", "math", "wasm", "typescript", "nodejs"]
