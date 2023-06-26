@@ -7,7 +7,7 @@ pub const N: Decimal256 = Decimal256::raw(2000000000000000000);
 pub const FEE_TOL: Decimal256 = Decimal256::raw(1000000000000000);
 /// N ^ 2
 pub const N_POW2: Decimal256 = Decimal256::raw(4000000000000000000);
-/// 1e-3
-pub const TOL: Decimal256 = Decimal256::raw(1000000000000000);
+/// 1e-5
+pub const TOL: Decimal256 = Decimal256::raw(10000000000000);
 /// Iterations limit for Newton's method
 pub const MAX_ITER: usize = 64;
