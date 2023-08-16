@@ -72,10 +72,6 @@ fn compute_provide(
     next_amp_time: u64,
     next_amp: u64,
 ) -> Result<(Uint128, Decimal, bool), ContractError> {
-    if deposits[0].is_zero() || deposits[1].is_zero() {
-        return Err(ContractError::InvalidZeroAmount {});
-    }
-
     let amp = compute_current_amp(block_time, init_amp_time, init_amp, next_amp_time, next_amp)?;
 
     let mut non_zero_flag = false;
