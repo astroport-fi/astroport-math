@@ -32,3 +32,10 @@ mod decimal_checked_ops {
 }
 
 pub use decimal_checked_ops::DecimalCheckedOps;
+
+pub mod uints {
+    use uint::construct_uint;
+    construct_uint! {
+        pub struct U256(4);
+    }
+}

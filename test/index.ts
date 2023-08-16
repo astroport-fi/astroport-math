@@ -1,7 +1,17 @@
 import chalk from "chalk";
 import { CosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import BigNumber from "bignumber.js";
-import { xyk_swap, stable_swap, concentrated_swap } from "@astroport/math";
+import {
+  xyk_swap,
+  xyk_provide,
+  xyk_withdraw,
+  stable_swap,
+  stable_provide,
+  stable_withdraw,
+  concentrated_swap,
+  concentrated_provide,
+  concentrated_withdraw,
+} from "@astroport/math";
 
 function assert(condition: boolean, message?: string) {
   if (!condition) {
@@ -27,6 +37,14 @@ type SwapResult = {
   return_amount: string;
   spread_amount: string;
   commission_amount: string;
+};
+
+type ProvideResult = {
+  share_amount: string;
+};
+
+type WithdrawResult = {
+  returned_amounts: [string, string];
 };
 
 type StablePoolRawConfig = {
@@ -61,7 +79,7 @@ type PCLPoolRawConfig = {
 
 const XYK_FEE = "0.003";
 const XYK_POOL =
-  "terra135j769waumvql6tn6x33zhfnnuhlcuhq79w7svyjhhn6p0r0v58su06vth";
+  "terra1p0t2kt26mredrp0va2uwzeyj7c7ny5g27ae6dxkcwas6hlrf39tsrehqzp";
 
 async function xyk_swap_test(client: CosmWasmClient) {
   const pool_info: PoolInfo = await client.queryContractSmart(XYK_POOL, {
@@ -106,13 +124,74 @@ async function xyk_swap_test(client: CosmWasmClient) {
       }
     }
 
-    console.info(chalk.green("xyk assertions: pass"));
+    console.info(chalk.green("xyk swap assertions: pass"));
     return true;
   } catch (e) {
     console.error(e);
     console.error(chalk.yellow("expected: ", JSON.stringify(simulation)));
     console.error(chalk.yellow("actual: ", JSON.stringify(xyk_result)));
-    console.error(chalk.red("xyk assertions: fail"));
+    console.error(chalk.red("xyk swap assertions: fail"));
+    return false;
+  }
+}
+
+async function xyk_provide_test() {
+  const asset_amounts: [string, string] = ["499395163721", "5007277236"];
+  const total_share = "50000024999";
+
+  const expected_share_amount = "49827194";
+  let xyk_result: ProvideResult | null = null;
+  try {
+    const deposits: [string, string] = ["497668967", "4989969"];
+
+    xyk_result = JSON.parse(
+      xyk_provide(
+        JSON.stringify(deposits),
+        JSON.stringify(asset_amounts),
+        total_share
+      )
+    );
+    assert(xyk_result.share_amount === expected_share_amount);
+
+    console.info(chalk.green("xyk provide assertions: pass"));
+    return true;
+  } catch (e) {
+    console.error(e);
+    console.error(
+      chalk.yellow("expected: ", JSON.stringify(expected_share_amount))
+    );
+    console.error(chalk.yellow("actual: ", JSON.stringify(xyk_result)));
+    console.error(chalk.red("xyk provide assertions: fail"));
+    return false;
+  }
+}
+
+async function xyk_withdraw_test() {
+  const asset_amounts: [string, string] = ["978346165766", "124116104943"];
+  const total_share = "348392451511";
+
+  const expected_returned_amounts: [string, string] = ["26120383", "3313714"];
+  let xyk_result: WithdrawResult | null = null;
+  try {
+    xyk_result = JSON.parse(
+      xyk_withdraw("9301559", JSON.stringify(asset_amounts), total_share)
+    );
+    assert(
+      xyk_result.returned_amounts[0] === expected_returned_amounts[0] &&
+        xyk_result.returned_amounts[1] === expected_returned_amounts[1]
+    );
+
+    console.info(chalk.green("xyk withdraw assertions: pass"));
+    return true;
+  } catch (e) {
+    console.error(e);
+    console.error(
+      chalk.yellow("expected: ", JSON.stringify(expected_returned_amounts))
+    );
+    console.error(
+      chalk.yellow("actual: ", JSON.stringify(xyk_result.returned_amounts))
+    );
+    console.error(chalk.red("xyk withdraw assertions: fail"));
     return false;
   }
 }
@@ -200,9 +279,86 @@ async function stable_swap_test(client: CosmWasmClient) {
   }
 }
 
+async function stable_provide_test() {
+  const asset_amounts: [string, string] = ["530256812", "100446728"];
+  const asset_precisions: [number, number] = [6, 6];
+  const total_share = "300000000";
+
+  const block_time = "1692147376";
+  const init_amp_time = "1692039296";
+  const init_amp = "10000";
+  const next_amp_time = "1692039296";
+  const next_amp = "10000";
+
+  const expected_share_amount = "447998664";
+  let stable_result: ProvideResult | null = null;
+  try {
+    const deposits: [string, string] = ["791847812", "150000000"];
+
+    stable_result = JSON.parse(
+      stable_provide(
+        JSON.stringify(deposits),
+        JSON.stringify(asset_amounts),
+        JSON.stringify(asset_precisions),
+        total_share,
+        block_time,
+        init_amp_time,
+        init_amp,
+        next_amp_time,
+        next_amp
+      )
+    );
+    assert(stable_result.share_amount === expected_share_amount);
+
+    console.info(chalk.green("stable provide assertions: pass"));
+    return true;
+  } catch (e) {
+    console.error(e);
+    console.error(
+      chalk.yellow("expected: ", JSON.stringify(expected_share_amount))
+    );
+    console.error(chalk.yellow("actual: ", JSON.stringify(stable_result)));
+    console.error(chalk.red("stable provide assertions: fail"));
+    return false;
+  }
+}
+
+async function stable_withdraw_test() {
+  const asset_amounts: [string, string] = ["530256812", "100446728"];
+  const total_share = "300000000";
+
+  const expected_returned_amounts: [string, string] = [
+    "530255044",
+    "100446393",
+  ];
+  let stable_result: WithdrawResult | null = null;
+  try {
+    stable_result = JSON.parse(
+      stable_withdraw("299999000", JSON.stringify(asset_amounts), total_share)
+    );
+    assert(
+      stable_result.returned_amounts[0] === expected_returned_amounts[0] &&
+        stable_result.returned_amounts[1] === expected_returned_amounts[1]
+    );
+
+    console.info(chalk.green("stable withdraw assertions: pass"));
+    return true;
+  } catch (e) {
+    console.error(e);
+    console.error(
+      chalk.yellow("expected: ", JSON.stringify(expected_returned_amounts))
+    );
+    console.error(
+      chalk.yellow("actual: ", JSON.stringify(stable_result.returned_amounts))
+    );
+    console.error(chalk.red("stable withdraw assertions: fail"));
+    return false;
+  }
+}
+
 const PCL_FEE = "0.1";
 const PCL_POOL =
-  "terra1afz26pgl3a7kaqnpfvxc5qayrwnnwaxw7u7rcgxs2kycrpm20pvsxxmdgy";
+  "terra10d3gqg5w9wa8d6lrqvfhhw2f9h8q0839rg0g66v0hmk4ndsdk5vsvhzh7l";
 
 async function concentrated_swap_test(client: CosmWasmClient) {
   const pool_info: PoolInfo = await client.queryContractSmart(PCL_POOL, {
@@ -290,14 +446,80 @@ async function concentrated_swap_test(client: CosmWasmClient) {
   }
 }
 
+async function concentrated_provide_test(client: CosmWasmClient) {
+  let simulation: unknown | null = null;
+  let pcl_result: unknown | null = null;
+  try {
+    for (let i = 3; i < 6; i++) {
+      for (let j = 0; j < 2; j++) {
+        pcl_result = JSON.parse(concentrated_provide());
+        assert(pcl_result === simulation);
+      }
+    }
+
+    console.info(chalk.green("pcl provide assertions: pass"));
+    return true;
+  } catch (e) {
+    console.error(e);
+    console.error(chalk.yellow("expected: ", JSON.stringify(simulation)));
+    console.error(chalk.yellow("actual: ", JSON.stringify(pcl_result)));
+    console.error(chalk.red("pcl provide assertions: fail"));
+    return false;
+  }
+}
+
+async function concentrated_withdraw_test(client: CosmWasmClient) {
+  let simulation: unknown | null = null;
+  let pcl_result: unknown | null = null;
+  try {
+    for (let i = 3; i < 6; i++) {
+      for (let j = 0; j < 2; j++) {
+        pcl_result = JSON.parse(concentrated_withdraw());
+        assert(pcl_result === simulation);
+      }
+    }
+
+    console.info(chalk.green("pcl withdraw assertions: pass"));
+    return true;
+  } catch (e) {
+    console.error(e);
+    console.error(chalk.yellow("expected: ", JSON.stringify(simulation)));
+    console.error(chalk.yellow("actual: ", JSON.stringify(pcl_result)));
+    console.error(chalk.red("pcl withdraw assertions: fail"));
+    return false;
+  }
+}
+
 (async function () {
   const client = await CosmWasmClient.connect("https://pisco-rpc.terra.dev/");
 
-  const xyk_test = await xyk_swap_test(client);
-  const stable_test = await stable_swap_test(client);
-  const concentrated_test = await concentrated_swap_test(client);
+  const xyk_swap_test_result = await xyk_swap_test(client);
+  const xyk_provide_test_result = await xyk_provide_test();
+  const xyk_withdraw_test_result = await xyk_withdraw_test();
 
-  if (!xyk_test || !stable_test || !concentrated_test) {
+  const stable_test = await stable_swap_test(client);
+  const stable_provide_test_result = await stable_provide_test();
+  const stable_withdraw_test_result = await stable_withdraw_test();
+
+  const concentrated_test = await concentrated_swap_test(client);
+  const concentrated_provide_test_result = await concentrated_provide_test(
+    client
+  );
+  const concentrated_withdraw_test_result = await concentrated_withdraw_test(
+    client
+  );
+
+  if (
+    !xyk_swap_test_result ||
+    !xyk_provide_test_result ||
+    !xyk_withdraw_test_result ||
+    !stable_test ||
+    !stable_provide_test_result ||
+    !stable_withdraw_test_result ||
+    !concentrated_test ||
+    !concentrated_provide_test_result ||
+    !concentrated_withdraw_test_result
+  ) {
     throw new Error("Tests failed!");
   }
 })();

@@ -84,7 +84,7 @@ pub fn concentrated_swap(
     let future_gamma = Decimal::from_str(future_gamma)
         .map_err(|e| JsValue::from_str(&format!("Invalid future_gamma: {}", e)))?;
 
-    let result = astroport::pair_concentrated::simulate(
+    let result = astroport::pair_concentrated::swap::simulate(
         offer_amount,
         offer_asset_prec,
         ask_ind,
@@ -112,32 +112,24 @@ pub fn concentrated_swap(
 }
 
 #[wasm_bindgen]
-pub fn xyk_swap(
-    offer_amount: &str,
-    ask_ind: &str,
-    asset_amounts: &str,
-    total_fee_rate: &str,
-) -> Result<JsValue, JsValue> {
+pub fn concentrated_provide() -> Result<JsValue, JsValue> {
     utils::set_panic_hook();
 
-    let offer_amount = offer_amount
-        .parse()
-        .map_err(|e| JsValue::from_str(&format!("Invalid offer_amount: {}", e)))?;
+    let result = astroport::pair_concentrated::provide::simulate()
+        .map_err(|e| JsValue::from_str(&format!("Error while simulating provide: {}", e)))?;
 
-    let ask_ind = ask_ind
-        .parse()
-        .map_err(|e| JsValue::from_str(&format!("Invalid ask_ind: {}", e)))?;
+    let json_result = serde_json::to_string(&result)
+        .map_err(|e| JsValue::from_str(&format!("Error while serializing result: {}", e)))?;
 
-    let asset_amounts = serde_json::from_str::<Vec<Uint128>>(asset_amounts)
-        .map_err(|e| JsValue::from_str(&format!("Invalid asset_amounts: {}", e)))?;
+    Ok(JsValue::from_str(&json_result))
+}
 
-    let total_fee_rate = total_fee_rate
-        .parse()
-        .map_err(|e| JsValue::from_str(&format!("Invalid total_fee_rate: {}", e)))?;
+#[wasm_bindgen]
+pub fn concentrated_withdraw() -> Result<JsValue, JsValue> {
+    utils::set_panic_hook();
 
-    let result =
-        astroport::pair_xyk::simulate(offer_amount, ask_ind, &asset_amounts, total_fee_rate)
-            .map_err(|e| JsValue::from_str(&format!("Error while simulating swap: {}", e)))?;
+    let result = astroport::pair_concentrated::withdraw::simulate()
+        .map_err(|e| JsValue::from_str(&format!("Error while simulating withdraw: {}", e)))?;
 
     let json_result = serde_json::to_string(&result)
         .map_err(|e| JsValue::from_str(&format!("Error while serializing result: {}", e)))?;
@@ -167,9 +159,6 @@ pub fn stable_swap(
     let offer_asset_prec = offer_asset_prec
         .parse()
         .map_err(|e| JsValue::from_str(&format!("Invalid offer_asset_prec: {}", e)))?;
-
-    // let offer_amount = Decimal256::with_precision(offer_amount, offer_asset_prec)
-    //     .map_err(|e| JsValue::from_str(&format!("Invalid offer_amount: {}", e)))?;
 
     let ask_ind = ask_ind
         .parse()
@@ -206,7 +195,7 @@ pub fn stable_swap(
         .parse()
         .map_err(|e| JsValue::from_str(&format!("Invalid next_amp: {}", e)))?;
 
-    let result = astroport::pair_stable::simulate(
+    let result = astroport::pair_stable::swap::simulate(
         offer_amount,
         offer_asset_prec,
         ask_ind,
@@ -220,6 +209,189 @@ pub fn stable_swap(
         next_amp,
     )
     .map_err(|e| JsValue::from_str(&format!("Error while simulating swap: {}", e)))?;
+
+    let json_result = serde_json::to_string(&result)
+        .map_err(|e| JsValue::from_str(&format!("Error while serializing result: {}", e)))?;
+
+    Ok(JsValue::from_str(&json_result))
+}
+
+#[wasm_bindgen]
+pub fn stable_provide(
+    deposits: &str,
+    asset_amounts: &str,
+    asset_precisions: &str,
+    total_share: &str,
+    block_time: &str,
+    init_amp_time: &str,
+    init_amp: &str,
+    next_amp_time: &str,
+    next_amp: &str,
+) -> Result<JsValue, JsValue> {
+    utils::set_panic_hook();
+
+    let deposits = serde_json::from_str::<Vec<Decimal256>>(deposits)
+        .map_err(|e| JsValue::from_str(&format!("Invalid deposits: {}", e)))?;
+
+    let asset_amounts = serde_json::from_str::<Vec<Decimal256>>(asset_amounts)
+        .map_err(|e| JsValue::from_str(&format!("Invalid asset_amounts: {}", e)))?;
+
+    let asset_precisions = serde_json::from_str::<Vec<u8>>(asset_precisions)
+        .map_err(|e| JsValue::from_str(&format!("Invalid asset_precisions: {}", e)))?;
+
+    let total_share = total_share
+        .parse()
+        .map_err(|e| JsValue::from_str(&format!("Invalid total_share: {}", e)))?;
+
+    let block_time = block_time
+        .parse()
+        .map_err(|e| JsValue::from_str(&format!("Invalid block_time: {}", e)))?;
+
+    let init_amp_time = init_amp_time
+        .parse()
+        .map_err(|e| JsValue::from_str(&format!("Invalid init_amp_time: {}", e)))?;
+
+    let init_amp = init_amp
+        .parse()
+        .map_err(|e| JsValue::from_str(&format!("Invalid init_amp: {}", e)))?;
+
+    let next_amp_time = next_amp_time
+        .parse()
+        .map_err(|e| JsValue::from_str(&format!("Invalid next_amp_time: {}", e)))?;
+
+    let next_amp = next_amp
+        .parse()
+        .map_err(|e| JsValue::from_str(&format!("Invalid next_amp: {}", e)))?;
+
+    let result = astroport::pair_stable::provide::simulate(
+        &deposits,
+        &asset_amounts,
+        &asset_precisions,
+        total_share,
+        block_time,
+        init_amp_time,
+        init_amp,
+        next_amp_time,
+        next_amp,
+    )
+    .map_err(|e| JsValue::from_str(&format!("Error while simulating provide: {}", e)))?;
+
+    let json_result = serde_json::to_string(&result)
+        .map_err(|e| JsValue::from_str(&format!("Error while serializing result: {}", e)))?;
+
+    Ok(JsValue::from_str(&json_result))
+}
+
+#[wasm_bindgen]
+pub fn stable_withdraw(
+    amount: &str,
+    asset_amounts: &str,
+    total_share: &str,
+) -> Result<JsValue, JsValue> {
+    utils::set_panic_hook();
+
+    let amount = amount
+        .parse()
+        .map_err(|e| JsValue::from_str(&format!("Invalid amount: {}", e)))?;
+
+    let asset_amounts = serde_json::from_str::<Vec<Uint128>>(asset_amounts)
+        .map_err(|e| JsValue::from_str(&format!("Invalid asset_amounts: {}", e)))?;
+
+    let total_share = total_share
+        .parse()
+        .map_err(|e| JsValue::from_str(&format!("Invalid total_share: {}", e)))?;
+
+    let result = astroport::pair_stable::withdraw::simulate(amount, &asset_amounts, total_share)
+        .map_err(|e| JsValue::from_str(&format!("Error while simulating withdraw: {}", e)))?;
+
+    let json_result = serde_json::to_string(&result)
+        .map_err(|e| JsValue::from_str(&format!("Error while serializing result: {}", e)))?;
+
+    Ok(JsValue::from_str(&json_result))
+}
+
+#[wasm_bindgen]
+pub fn xyk_swap(
+    offer_amount: &str,
+    ask_ind: &str,
+    asset_amounts: &str,
+    total_fee_rate: &str,
+) -> Result<JsValue, JsValue> {
+    utils::set_panic_hook();
+
+    let offer_amount = offer_amount
+        .parse()
+        .map_err(|e| JsValue::from_str(&format!("Invalid offer_amount: {}", e)))?;
+
+    let ask_ind = ask_ind
+        .parse()
+        .map_err(|e| JsValue::from_str(&format!("Invalid ask_ind: {}", e)))?;
+
+    let asset_amounts = serde_json::from_str::<Vec<Uint128>>(asset_amounts)
+        .map_err(|e| JsValue::from_str(&format!("Invalid asset_amounts: {}", e)))?;
+
+    let total_fee_rate = total_fee_rate
+        .parse()
+        .map_err(|e| JsValue::from_str(&format!("Invalid total_fee_rate: {}", e)))?;
+
+    let result =
+        astroport::pair_xyk::swap::simulate(offer_amount, ask_ind, &asset_amounts, total_fee_rate)
+            .map_err(|e| JsValue::from_str(&format!("Error while simulating swap: {}", e)))?;
+
+    let json_result = serde_json::to_string(&result)
+        .map_err(|e| JsValue::from_str(&format!("Error while serializing result: {}", e)))?;
+
+    Ok(JsValue::from_str(&json_result))
+}
+
+#[wasm_bindgen]
+pub fn xyk_provide(
+    deposits: &str,
+    asset_amounts: &str,
+    total_share: &str,
+) -> Result<JsValue, JsValue> {
+    utils::set_panic_hook();
+
+    let deposits = serde_json::from_str::<Vec<Uint128>>(deposits)
+        .map_err(|e| JsValue::from_str(&format!("Invalid deposits: {}", e)))?;
+
+    let asset_amounts = serde_json::from_str::<Vec<Uint128>>(asset_amounts)
+        .map_err(|e| JsValue::from_str(&format!("Invalid asset_amounts: {}", e)))?;
+
+    let total_share = total_share
+        .parse()
+        .map_err(|e| JsValue::from_str(&format!("Invalid total_share: {}", e)))?;
+
+    let result = astroport::pair_xyk::provide::simulate(&deposits, &asset_amounts, total_share)
+        .map_err(|e| JsValue::from_str(&format!("Error while simulating provide: {}", e)))?;
+
+    let json_result = serde_json::to_string(&result)
+        .map_err(|e| JsValue::from_str(&format!("Error while serializing result: {}", e)))?;
+
+    Ok(JsValue::from_str(&json_result))
+}
+
+#[wasm_bindgen]
+pub fn xyk_withdraw(
+    amount: &str,
+    asset_amounts: &str,
+    total_share: &str,
+) -> Result<JsValue, JsValue> {
+    utils::set_panic_hook();
+
+    let amount = amount
+        .parse()
+        .map_err(|e| JsValue::from_str(&format!("Invalid amount: {}", e)))?;
+
+    let asset_amounts = serde_json::from_str::<Vec<Uint128>>(asset_amounts)
+        .map_err(|e| JsValue::from_str(&format!("Invalid asset_amounts: {}", e)))?;
+
+    let total_share = total_share
+        .parse()
+        .map_err(|e| JsValue::from_str(&format!("Invalid total_share: {}", e)))?;
+
+    let result = astroport::pair_xyk::withdraw::simulate(amount, &asset_amounts, total_share)
+        .map_err(|e| JsValue::from_str(&format!("Error while simulating withdraw: {}", e)))?;
 
     let json_result = serde_json::to_string(&result)
         .map_err(|e| JsValue::from_str(&format!("Error while serializing result: {}", e)))?;

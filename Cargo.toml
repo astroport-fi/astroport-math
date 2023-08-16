@@ -3,7 +3,16 @@ name = "math"
 version = "0.3.0"
 edition = "2021"
 description = "A collection of math functions extractde from Astroport smart contracts to be used with WASM in TypeScript/NodeJS."
-keywords = ["astroport", "blockchain", "dex", "swap", "math", "wasm", "typescript", "nodejs"]
+keywords = [
+    "astroport",
+    "blockchain",
+    "dex",
+    "swap",
+    "math",
+    "wasm",
+    "typescript",
+    "nodejs",
+]
 license = "GPL-3"
 authors = ["astroport", "Delphi Labs (delphi-labs)"]
 repository = "https://github.com/astroport-fi/astroport-math.git"
@@ -18,9 +27,10 @@ default = ["console_error_panic_hook"]
 
 [dependencies]
 wasm-bindgen = "0.2"
-console_error_panic_hook = {version = "0.1.7", optional = true}
+console_error_panic_hook = { version = "0.1.7", optional = true }
 cosmwasm-std = "1.1"
 itertools = "0.10"
 cosmwasm-schema = "1.1"
 thiserror = "1.0"
 serde_json = "1.0.96"
+uint = "0.9"

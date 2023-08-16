@@ -423,6 +423,7 @@ dependencies = [
  "itertools",
  "serde_json",
  "thiserror",
+ "uint",
  "wasm-bindgen",
 ]
 
