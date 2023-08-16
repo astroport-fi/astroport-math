@@ -1,5 +1,5 @@
 use cosmwasm_schema::cw_serde;
-use cosmwasm_std::{Decimal256, StdError, StdResult, Uint128};
+use cosmwasm_std::{Decimal, Decimal256, StdError, StdResult, Uint128};
 
 use super::{
     consts::MINIMUM_LIQUIDITY_AMOUNT,
@@ -14,6 +14,8 @@ use crate::astroport::cosmwasm_ext::Decimal256Ext;
 pub struct SimulationResponse {
     /// The amount of lps returned by the provide
     pub share_amount: Uint128,
+    pub slippage: Decimal,
+    pub positive_slippage: bool,
 }
 
 pub fn simulate(
@@ -39,7 +41,7 @@ pub fn simulate(
         .map(|(i, amount)| Decimal256::with_precision(amount.to_uint256(), asset_precisions[i]))
         .collect::<Result<Vec<Decimal256>, StdError>>()?;
 
-    let share_amount = compute_provide(
+    let (share_amount, slippage, positive_slippage) = compute_provide(
         &deposits,
         &asset_amounts,
         asset_precisions,
@@ -52,7 +54,11 @@ pub fn simulate(
     )
     .map_err(|err| StdError::generic_err(format!("{err}")))?;
 
-    Ok(SimulationResponse { share_amount })
+    Ok(SimulationResponse {
+        share_amount,
+        slippage,
+        positive_slippage,
+    })
 }
 
 fn compute_provide(
@@ -65,7 +71,7 @@ fn compute_provide(
     init_amp: u64,
     next_amp_time: u64,
     next_amp: u64,
-) -> Result<Uint128, ContractError> {
+) -> Result<(Uint128, Decimal, bool), ContractError> {
     if deposits[0].is_zero() || deposits[1].is_zero() {
         return Err(ContractError::InvalidZeroAmount {});
     }
@@ -122,5 +128,28 @@ fn compute_provide(
         share
     };
 
-    Ok(share)
+    let sum_deposit = deposits
+        .iter()
+        .enumerate()
+        .map(|(i, amount)| amount.to_uint128_with_precision(asset_precisions[i]))
+        .sum::<StdResult<Uint128>>()?;
+
+    let virtual_price = deposit_d
+        .to_uint128_with_precision(greatest_precision(asset_precisions))?
+        / (total_share + share);
+
+    let positive_slippage: bool;
+    let slippage_diff = if sum_deposit > (share * virtual_price) {
+        positive_slippage = false;
+
+        sum_deposit - (share * virtual_price)
+    } else {
+        positive_slippage = true;
+
+        (share * virtual_price) - sum_deposit
+    };
+
+    let slippage = Decimal::from_ratio(slippage_diff, sum_deposit);
+
+    Ok((share, slippage, positive_slippage))
 }

@@ -41,6 +41,8 @@ type SwapResult = {
 
 type ProvideResult = {
   share_amount: string;
+  slippage?: string;
+  positive_slippage?: boolean;
 };
 
 type WithdrawResult = {
