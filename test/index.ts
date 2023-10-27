@@ -49,7 +49,16 @@ type WithdrawResult = {
   returned_amounts: [string, string];
 };
 
+type XykPoolRawConfig = {
+  block_time_last: number;
+  price0_cumulative_last: string;
+  price1_cumulative_last: string;
+};
+
 type StablePoolRawConfig = {
+  block_time_last: number;
+  price0_cumulative_last: string;
+  price1_cumulative_last: string;
   init_amp: number;
   init_amp_time: number;
   next_amp: number;
