@@ -83,7 +83,12 @@ type PCLPoolRawConfig = {
     future_time: number;
     initial_time: number;
     price_state: {
+      oracle_price: string;
+      last_price: string;
       price_scale: string;
+      last_price_update: string;
+      xcp_profit: string;
+      xcp_profit_real: string;
     };
   };
 };
@@ -384,6 +389,7 @@ async function concentrated_swap_test(client: CosmWasmClient) {
     Buffer.from(rawConfig).toString()
   );
 
+  const oracle_price = pool_config.pool_state.price_state.oracle_price;
   const price_scale = pool_config.pool_state.price_state.price_scale;
   const fee_gamma = pool_config.pool_params.fee_gamma;
   const mid_fee = pool_config.pool_params.mid_fee;
@@ -425,6 +431,7 @@ async function concentrated_swap_test(client: CosmWasmClient) {
             "6", // ask_asset_prec,
             JSON.stringify(asset_amounts),
             PCL_FEE,
+            oracle_price,
             price_scale,
             fee_gamma,
             mid_fee,

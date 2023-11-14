@@ -24,6 +24,7 @@ pub fn simulate(
     ask_asset_prec: u32,
     asset_amounts: &[Decimal256],
     maker_fee_share: Decimal256,
+    oracle_price: Decimal256,
     price_scale: Decimal256,
     fee_gamma: Decimal256,
     mid_fee: Decimal256,
@@ -55,6 +56,7 @@ pub fn simulate(
         offer_amount,
         ask_ind,
         maker_fee_share,
+        oracle_price,
         price_scale,
         fee_gamma,
         mid_fee,
@@ -91,6 +93,7 @@ fn compute_swap(
     offer_amount: Decimal256,
     ask_ind: usize,
     maker_fee_share: Decimal256,
+    oracle_price: Decimal256,
     price_scale: Decimal256,
     fee_gamma: Decimal256,
     mid_fee: Decimal256,
@@ -120,13 +123,11 @@ fn compute_swap(
 
     let d = calc_d(&ixs, &amp_gamma)?;
 
-    let offer_amount = if offer_ind == 1 {
-        offer_amount * price_scale
+    if offer_ind == 1 {
+        ixs[offer_ind] += offer_amount * price_scale;
     } else {
-        offer_amount
-    };
-
-    ixs[offer_ind] += offer_amount;
+        ixs[offer_ind] += offer_amount;
+    }
 
     let new_y = calc_y(&ixs, d, &amp_gamma, ask_ind)?;
     let mut dy = ixs[ask_ind] - new_y;
@@ -139,8 +140,13 @@ fn compute_swap(
         price_scale
     };
 
-    // Since price_scale moves slower than real price spread fee may become negative
-    let spread_fee = (offer_amount * price).saturating_sub(dy);
+    // Derive spread using oracle price
+    let spread_fee = if ask_ind == 1 {
+        dy /= price_scale;
+        (offer_amount / oracle_price).saturating_sub(dy)
+    } else {
+        offer_amount.saturating_sub(dy / oracle_price)
+    };
 
     let fee_rate = fee(&ixs, fee_gamma, mid_fee, out_fee);
     let total_fee = fee_rate * dy;

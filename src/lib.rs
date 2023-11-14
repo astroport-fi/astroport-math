@@ -13,6 +13,7 @@ pub fn concentrated_swap(
     ask_asset_prec: &str,
     asset_amounts: &str,
     maker_fee_share: &str,
+    oracle_price: &str,
     price_scale: &str,
     fee_gamma: &str,
     mid_fee: &str,
@@ -47,6 +48,9 @@ pub fn concentrated_swap(
 
     let maker_fee_share = Decimal256::from_str(maker_fee_share)
         .map_err(|e| JsValue::from_str(&format!("Invalid maker_fee_share: {}", e)))?;
+
+    let oracle_price = Decimal256::from_str(oracle_price)
+        .map_err(|e| JsValue::from_str(&format!("Invalid oracle_price: {}", e)))?;
 
     let price_scale = Decimal256::from_str(price_scale)
         .map_err(|e| JsValue::from_str(&format!("Invalid price_scale: {}", e)))?;
@@ -91,6 +95,7 @@ pub fn concentrated_swap(
         ask_asset_prec,
         &asset_amounts,
         maker_fee_share,
+        oracle_price,
         price_scale,
         fee_gamma,
         mid_fee,
