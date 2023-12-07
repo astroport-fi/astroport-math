@@ -5,7 +5,7 @@ use super::{
 };
 use crate::astroport::cosmwasm_ext::{Decimal256Ext, DecimalToInteger};
 use cosmwasm_schema::cw_serde;
-use cosmwasm_std::{Decimal, Decimal256, Fraction, StdError, StdResult, Uint128};
+use cosmwasm_std::{Decimal, Decimal256, StdError, StdResult, Uint128};
 
 #[cw_serde]
 pub struct SwapSimulationResponse {
@@ -80,7 +80,6 @@ pub fn simulate(
 #[cw_serde]
 pub struct SwapResult {
     pub new_y: Decimal256,
-    pub price: Decimal256,
     pub offer_amount: Decimal256,
     pub dy: Decimal256,
     pub spread_fee: Decimal256,
@@ -120,7 +119,6 @@ fn compute_swap(
         future_amp,
         future_gamma,
     );
-
     let d = calc_d(&ixs, &amp_gamma)?;
 
     if offer_ind == 1 {
@@ -133,14 +131,6 @@ fn compute_swap(
     let mut dy = ixs[ask_ind] - new_y;
     ixs[ask_ind] = new_y;
 
-    let price = if ask_ind == 1 {
-        dy /= price_scale;
-        price_scale.inv().unwrap()
-    } else {
-        price_scale
-    };
-
-    // Derive spread using oracle price
     let spread_fee = if ask_ind == 1 {
         dy /= price_scale;
         (offer_amount / oracle_price).saturating_sub(dy)
@@ -154,7 +144,6 @@ fn compute_swap(
 
     Ok(SwapResult {
         new_y,
-        price,
         offer_amount,
         dy,
         spread_fee,
