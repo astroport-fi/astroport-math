@@ -402,15 +402,13 @@ async function concentrated_swap_test(client: CosmWasmClient) {
   const future_amp = pool_config.pool_state.future.amp;
   const future_gamma = pool_config.pool_state.future.gamma;
 
-  let ask_ind = 0;
-  let offer_amount: BigNumber | null = null;
   let simulation: SwapResult | null = null;
   let pcl_result: SwapResult | null = null;
   try {
     for (let i = 3; i < 6; i++) {
       for (let j = 0; j < 2; j++) {
-        ask_ind = j;
-        offer_amount = BigNumber(asset_amounts[1 - ask_ind])
+        let ask_ind = j;
+        let offer_amount = BigNumber(asset_amounts[ask_ind])
           .dividedBy(i)
           .decimalPlaces(0);
 
@@ -418,7 +416,7 @@ async function concentrated_swap_test(client: CosmWasmClient) {
           simulation: {
             offer_asset: {
               amount: offer_amount,
-              info: pool_info.assets[1 - ask_ind].info,
+              info: pool_info.assets[ask_ind].info,
             },
           },
         });
@@ -427,7 +425,7 @@ async function concentrated_swap_test(client: CosmWasmClient) {
           concentrated_swap(
             offer_amount.toString(),
             "6", // offer_asset_prec,
-            String(ask_ind),
+            String(1 - ask_ind),
             "6", // ask_asset_prec,
             JSON.stringify(asset_amounts),
             PCL_FEE,
@@ -445,6 +443,7 @@ async function concentrated_swap_test(client: CosmWasmClient) {
             future_gamma
           )
         );
+
         assert(
           pcl_result.return_amount === simulation.return_amount &&
             pcl_result.spread_amount === simulation.spread_amount &&
@@ -509,7 +508,9 @@ async function concentrated_withdraw_test(client: CosmWasmClient) {
 }
 
 (async function () {
-  const client = await CosmWasmClient.connect("https://pisco-rpc.terra.dev/");
+  const client = await CosmWasmClient.connect(
+    "https://terra-testnet-rpc.polkachu.com/"
+  );
 
   const xyk_swap_test_result = await xyk_swap_test(client);
   const xyk_provide_test_result = await xyk_provide_test();
